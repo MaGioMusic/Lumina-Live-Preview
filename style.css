@@ -282,7 +282,8 @@ body, html {
 
     .logo {
         margin-top: 0;
-        margin-bottom: 40px;
+        margin-bottom: 54px;
+        transform: translateY(-14px);
     }
 
     .q-logo-img {
@@ -364,8 +365,9 @@ body, html {
     }
 
     .logo {
-        margin-top: 10px;
-        margin-bottom: 16px;
+        margin-top: 4px;
+        margin-bottom: 24px;
+        transform: translateY(-8px);
     }
 
     .q-logo-img {
@@ -450,8 +452,9 @@ body, html {
     }
 
     .logo {
-        margin-top: 8px;
-        margin-bottom: 14px;
+        margin-top: 2px;
+        margin-bottom: 20px;
+        transform: translateY(-6px);
     }
 
     .q-logo-img {
@@ -616,10 +619,10 @@ body, html {
     text-align: center;
     position: relative;
     isolation: isolate;
-    margin-top: 14px;
-    margin-bottom: 20px;
+    margin-top: 8px;
+    margin-bottom: 28px;
     z-index: 10;
-    transform: translateY(0px);
+    transform: translateY(-10px);
 }
 
 .logo::after {
