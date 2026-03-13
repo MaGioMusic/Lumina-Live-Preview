@@ -52,12 +52,36 @@ async function hashValue(value: string) {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function verifyTurnstile(token: string, clientIp: string) {
+async function getTurnstileSecret(supabaseAdmin: ReturnType<typeof createClient>) {
+  const configuredSecret = Deno.env.get("CLOUDFLARE_TURNSTILE_SECRET_KEY")?.trim();
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("app_private_config")
+    .select("config_value")
+    .eq("config_key", "cloudflare_turnstile_secret_key")
+    .maybeSingle();
+
+  if (error) {
+    console.error("turnstile secret lookup failed", error);
+    return "";
+  }
+
+  return typeof data?.config_value === "string" ? data.config_value.trim() : "";
+}
+
+async function verifyTurnstile(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  token: string,
+  clientIp: string,
+) {
   try {
-    const configuredSecret = Deno.env.get("CLOUDFLARE_TURNSTILE_SECRET_KEY");
+    const configuredSecret = await getTurnstileSecret(supabaseAdmin);
     const secret = configuredSecret || TEST_TURNSTILE_SECRET;
 
-    // When no real secret is configured yet, only accept Cloudflare's dummy test token shape.
+    // Only use Cloudflare's dummy secret for local/test flows when no production secret is configured.
     if (!configuredSecret && !token.includes(".DUMMY.TOKEN.")) {
       return { success: false, "error-codes": ["turnstile-test-token-invalid"] };
     }
@@ -187,7 +211,7 @@ Deno.serve(async (request) => {
       return jsonResponse({ success: false, error: "Too many attempts. Please try again later." }, 429);
     }
 
-    const turnstileResult = await verifyTurnstile(token, clientIp);
+    const turnstileResult = await verifyTurnstile(supabaseAdmin, token, clientIp);
     if (!turnstileResult.success) {
       return jsonResponse({ success: false, error: "Security check failed. Please try again." }, 400);
     }

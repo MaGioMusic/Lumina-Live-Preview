@@ -14,8 +14,15 @@ CREATE TABLE IF NOT EXISTS newsletter_signup_attempts (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS app_private_config (
+  config_key TEXT PRIMARY KEY,
+  config_value TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
 ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE newsletter_signup_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_private_config ENABLE ROW LEVEL SECURITY;
 
 WITH ranked_emails AS (
   SELECT
@@ -51,3 +58,4 @@ CREATE INDEX IF NOT EXISTS idx_newsletter_signup_attempts_ip_hash_created_at
 
 REVOKE ALL ON TABLE newsletter_subscribers FROM anon, authenticated;
 REVOKE ALL ON TABLE newsletter_signup_attempts FROM anon, authenticated;
+REVOKE ALL ON TABLE app_private_config FROM anon, authenticated;
